@@ -1,0 +1,11 @@
+#!/usr/bin/env fish
+
+for stack in (list-cloudformation-stacks)
+    set_color blue
+    echo $stack:
+    set_color normal
+
+    for resource in (list-cloudformation-stack-resources $stack | grep --color=always $argv)
+        echo " - $resource"
+    end
+end

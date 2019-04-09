@@ -1,0 +1,12 @@
+#!/bin/sh
+
+exec aws \
+  cloudformation \
+  describe-stack-resource-drifts \
+  --stack-resource-drift-status-filters \
+    DELETED \
+    MODIFIED \
+  --stack-name "$1" \
+| jq \
+  -r \
+  '.StackResourceDrifts[].LogicalResourceId'

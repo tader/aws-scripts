@@ -1,0 +1,9 @@
+#!/bin/sh
+
+exec aws \
+  cloudformation \
+  describe-stack-resources \
+  --stack-name "$1" \
+| jq \
+  -r \
+  '.StackResources[].PhysicalResourceId'

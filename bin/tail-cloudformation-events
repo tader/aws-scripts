@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+# vim: set fileencoding=utf-8 :
+
+import sys
+import boto3
+import time
+import os
+
+stack = sys.argv[1]
+
+session = boto3.Session()
+cf = session.client('cloudformation')
+
+last_event = None
+resources = {}
+
+def format_state(state):
+    if state.endswith("COMPLETE"):
+        return "👍 {}".format(state)
+
+    if state.endswith("PROGRESS"):
+        return "💥 {}".format(state)
+
+    if state.endswith("FAILED"):
+        return "🚨 {}".format(state)
+
+    return "☁️ {}".format(state)
+
+def show_state():
+  global resources
+  global last_event
+
+  events = cf.describe_stack_events(StackName=stack).get('StackEvents', [])
+  #events.reverse()
+
+  for event in events:
+      if last_event == event['EventId']:
+          break
+
+      if event['LogicalResourceId'] not in resources:
+        resources[event['LogicalResourceId']] = {
+          'id': event['LogicalResourceId'],
+          'state': format_state(event['ResourceStatus']),
+          'type': event['ResourceType'],
+          'time': event['Timestamp']
+        }
+
+  last_event = event['EventId']
+
+  for resource in resources.values():
+      print("{state: <32} {type: <42} {id}".format(**resource))
+
+if __name__ == '__main__':
+  while True:
+      os.system('clear')
+      show_state()
+      time.sleep(5)

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+exec aws \
+  s3api list-buckets \
+| jq \
+  -r \
+  '.Buckets[].Name'

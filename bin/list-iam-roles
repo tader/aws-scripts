@@ -1,0 +1,8 @@
+#!/bin/sh
+
+exec aws \
+  iam \
+  list-roles \
+| jq \
+  -r -S \
+  '.Roles | sort_by(.Path, .RoleName) | .[] | .RoleId + " " + .Path + .RoleName'

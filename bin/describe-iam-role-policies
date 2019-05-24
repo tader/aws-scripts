@@ -1,0 +1,14 @@
+#!/bin/sh
+
+(
+for policy in $(aws iam list-attached-role-policies --role-name "$1" |jq -r '.AttachedPolicies[].PolicyArn')
+do
+    version=$(aws iam get-policy --policy-arn "$policy" |jq -r .Policy.DefaultVersionId)
+    aws iam get-policy-version --policy-arn "$policy" --version-id "$version" |jq -C .
+done
+
+for policy in $(aws iam list-role-policies --role-name "$1" |jq -r '.PolicyNames[]')
+do
+      aws iam get-role-policy --role-name "$1" --policy-name "$policy" |jq -C .
+done
+) |less -R

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+exec aws \
+  iam \
+  list-users \
+| jq \
+  -r -S \
+  '.Users | sort_by(.UserName) | .[] | .UserName'
+#   '.Roles | sort_by(.Path, .RoleName) | .[] | .RoleId + " " + .Path + .RoleName'

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+exec aws \
+  iam \
+  list-mfa-devices \
+  --user-name "$1" \
+| jq \
+  -r -S \
+  '.MFADevices | sort_by(.SerialNumber) | .[] | .SerialNumber'

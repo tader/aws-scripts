@@ -1,0 +1,38 @@
+#!/bin/sh
+
+DEFAULT_PASSWORD="VerschrikkelijkSuperErgGeheimWachtwoord"
+
+promptyn () {
+    while true; do
+        read -p "$1 (y/N) " yn
+        case $yn in
+            [Yy]* ) return 0;;
+            [Nn]* ) return 1;;
+            "" ) return 1;;
+        esac
+    done
+}
+
+message=""
+
+if promptyn "Reset user $1's password?"; then
+  aws iam update-login-profile \
+    --user-name "$1" \
+    --password-reset-required \
+    --password "$DEFAULT_PASSWORD"
+
+  message="$message\nYour password has been reset to \`$DEFAULT_PASSWORD\`."
+fi
+
+if promptyn "Reset $1's MFA?"; then
+  for mfa in $(list-iam-mfa-devices "$1"); do
+    aws iam deactivate-mfa-device \
+      --user-name "$1" \
+      --serial-number "$mfa"
+    aws iam delete-virtual-mfa-device \
+      --serial-number "$mfa"
+  done
+  message="$message\nYour MFA has been reset, please setup a new MFA!"
+fi
+
+echo $message
